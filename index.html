@@ -49,6 +49,32 @@
             text-align: center;
         }
         .played-card { display: inline-block; margin: 0 10px; }
+
+
+        /* index.html -> <style> */
+
+/* --- NAYA NOTIFICATION STYLE --- */
+.message-box {
+    position: absolute; /* Yeh baaki content ke upar tairta hai */
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Isse bilkul center mein aa jayega */
+    background-color: rgba(0, 0, 0, 0.75); /* Thoda sa transparent black */
+    color: white;
+    padding: 15px 30px;
+    border-radius: 20px;
+    font-size: 1.2em;
+    z-index: 100; /* Yeh sure karega ki yeh sabse upar dikhe */
+    opacity: 1;
+    transition: opacity 0.5s, top 0.5s; /* Smooth fade aur move effect */
+}
+
+.message-box.hidden {
+    opacity: 0; /* Isko gayab kar dega */
+    top: -50px; /* Isko screen ke upar bhej dega */
+    pointer-events: none; /* Ispe click nahi ho payega jab yeh chupa ho */
+}
+
     </style>
 </head>
 <body>
@@ -56,6 +82,11 @@
     <div class="game-board">
         <h1>Royal Flushdown</h1>
         
+
+        <div id="message-box" class="message-box hidden">
+        <p id="message-text"></p>
+    </div>
+
         <!-- Game ki status yahan dikhegi -->
         <div id="game-status"></div>
 
@@ -65,9 +96,7 @@
             <div id="trick-pile"></div>
         </div>
 
-        <!-- <div class="card clickable" data-suit="H" data-value="K">
-            <img src="assets/Images/PNG-cards-1.3/10_of_clubs.png" alt="K of H">
-    </div> -->
+      
 
         <!-- Saare players aur unke cards yahan dikhenge -->
         <div id="players-area"></div>

@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const trickPileDiv = document.getElementById('trick-pile');
     const restartButton = document.getElementById('restart-button');
 
+    const messageBox = document.getElementById('message-box');
+    const messageText = document.getElementById('message-text');
+
     // --- 3. RENDER FUNCTION ---
 
 
@@ -82,6 +85,17 @@ function renderGame() {
 }
 
 
+function showMessage(message, duration = 2000) {
+    messageText.textContent = message;
+    messageBox.classList.remove('hidden');
+
+    // Thodi der baad message ko wapas chupa do
+    setTimeout(() => {
+        messageBox.classList.add('hidden');
+    }, duration);
+}
+
+
 
 
 
@@ -142,14 +156,75 @@ function renderGame() {
     // }
 
     // --- 4. EVENT HANDLING & AI LOGIC ---
-    function getComputerMove(player, trickSuit) {
-        const hand = player.hand;
-        if (trickSuit) {
-            const matchingSuitCard = hand.find(card => card.suit === trickSuit);
-            if (matchingSuitCard) return matchingSuitCard;
+    // function getComputerMove(player, trickSuit) {
+    //     const hand = player.hand;
+    //     if (trickSuit) {
+    //         const matchingSuitCard = hand.find(card => card.suit === trickSuit);
+    //         if (matchingSuitCard) return matchingSuitCard;
+    //     }
+    //     return hand[0]; 
+    // }
+
+    // src/app.js - REPLACE THE OLD getComputerMove WITH THIS NEW ONE
+
+function getComputerMove(player, trickSuit) {
+    const hand = player.hand;
+
+    // --- Helper function to sort cards by value ---
+    const sortCards = (cards) => {
+        return [...cards].sort((a, b) => game._getCardValue(a.value) - game._getCardValue(b.value));
+    };
+
+    // --- Case 1: AI must follow suit ---
+    if (trickSuit) {
+        const playableCards = hand.filter(card => card.suit === trickSuit);
+
+        // If the AI has cards of the trick's suit...
+        if (playableCards.length > 0) {
+            const sortedPlayableCards = sortCards(playableCards);
+
+            // Find the highest card currently in the trick
+            let highestCardInTrick = null;
+            if (game.trick.length > 0) {
+                const trickCardsOfSuit = game.trick.filter(play => play.card.suit === trickSuit);
+                if (trickCardsOfSuit.length > 0) {
+                    highestCardInTrick = sortCards(trickCardsOfSuit.map(play => play.card)).pop();
+                }
+            }
+
+            // Sub-rule 1.1: Can the AI win?
+            if (highestCardInTrick) {
+                // Find the smallest card that can beat the highest card in the trick
+                const winningCard = sortedPlayableCards.find(card => 
+                    game._getCardValue(card.value) > game._getCardValue(highestCardInTrick.value)
+                );
+
+                if (winningCard) {
+                    console.log(`AI Strategy: Winning trick with the lowest possible winner: ${winningCard.value}${winningCard.suit}`);
+                    return winningCard;
+                }
+            } else {
+                // If AI is starting the trick or no one has played the suit yet, it can't "win" yet.
+                // But if it has the Ace, maybe play it? For now, let's keep it simple.
+                // We'll proceed to the "lose cheaply" logic.
+            }
+
+            // Sub-rule 1.2: If AI can't win, play the lowest card (lose cheaply)
+            const lowestCard = sortedPlayableCards[0];
+            console.log(`AI Strategy: Cannot win. Playing lowest card of suit: ${lowestCard.value}${lowestCard.suit}`);
+            return lowestCard;
         }
-        return hand[0]; 
     }
+
+    // --- Case 2: AI cannot follow suit (can play any card) ---
+    // Strategy: Throw away the absolute lowest card from the entire hand.
+    const sortedHand = sortCards(hand);
+    const lowestCardInHand = sortedHand[0];
+    console.log(`AI Strategy: Cannot follow suit. Throwing away lowest card: ${lowestCardInHand.value}${lowestCardInHand.suit}`);
+    return lowestCardInHand;
+}
+
+
 
     function addCardClickListeners() {
         const clickableCards = document.querySelectorAll('.card.clickable');
@@ -193,7 +268,10 @@ function renderGame() {
         if (isTrickComplete) {
             // Trick poori hone ke baad thoda ruko
             setTimeout(() => {
-                alert(`${game.players[game.trickWinner].name} wins the trick!`);
+
+                // alert(`${game.players[game.trickWinner].name} wins the trick!`);
+
+                showMessage(`${game.players[game.trickWinner].name} wins the trick!`);
                 game.startNewTrick(); // Board saaf karo
                 renderGame(); // Saaf board dikhao
 
@@ -216,7 +294,9 @@ function renderGame() {
                     winner = game.players[i];
                 }
             }
-            setTimeout(() => alert(`GAME OVER! Winner is ${winner.name}`), 500);
+            setTimeout(() => {
+            showMessage(`GAME OVER! Winner is ${winner.name}`, 4000); // Isko thoda zyada der tak dikhayenge
+        }, 500);
             restartButton.style.display = 'block';
             return true;
         }
