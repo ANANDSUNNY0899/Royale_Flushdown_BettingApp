@@ -27,6 +27,11 @@ This project started as an exercise to deepen my understanding of JavaScript's c
 -   **Complete Game Loop:** The game handles everything from shuffling and dealing to scoring tricks and declaring a final winner.
 -   **"Play Again" Functionality:** Once a game is over, you can instantly start a new one without refreshing the page.
 
+- the Strategic AI:
+"Developed challenging AI opponents that don't just play randomly. They follow strategic rules, such as winning a trick when possible or playing their lowest card to save high cards for later."
+Add a point about the Custom Notifications:
+"Replaced standard browser alert() pop-ups with a custom, animated notification system for a modern and seamless user experience."
+
 ---
 
 ## How to Run This Project
